@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import type { PlantingSpot } from '@/core/planting-spots/domain/interfaces/planting-spot.interface';
 import type { PlantingSpotType } from '@/core/planting-spots/domain/types/planting-spot-type.type';
+import dictEn from '@/core/planting-spots/presentation/i18n/en';
 
 vi.mock('next/link', () => ({
   default: ({ href, children }: { href: string; children: React.ReactNode }) => (
@@ -44,6 +45,8 @@ const dict = {
     overCapacity: 'Over capacity',
     plants: 'plants',
     noCapacity: 'No limit',
+    viewGrid: 'Grid layout',
+    viewList: 'List view',
   },
   form: {
     titleCreate: 'New planting spot',
@@ -129,6 +132,7 @@ const dict = {
     cancel: 'Cancel',
     error: 'Could not add the plant. Try again.',
   },
+  layout: dictEn.layout,
 };
 
 describe('PlantingSpotCard', () => {

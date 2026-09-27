@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { PlantingSpot } from '@/core/planting-spots/domain/interfaces/planting-spot.interface';
 import type { WaterPlantingSpotResult } from '@/core/planting-spots/domain/interfaces/water-planting-spot-result.interface';
+import dictEn from '@/core/planting-spots/presentation/i18n/en';
 
 const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
@@ -106,6 +107,8 @@ const dict = {
     overCapacity: 'Over capacity',
     plants: 'plants',
     noCapacity: 'No limit',
+    viewGrid: 'Grid layout',
+    viewList: 'List view',
   },
   form: {
     titleCreate: 'New planting spot',
@@ -191,6 +194,7 @@ const dict = {
     cancel: 'Cancel',
     error: 'Could not add the plant. Try again.',
   },
+  layout: dictEn.layout,
 };
 
 const baseSpot: PlantingSpot = {
