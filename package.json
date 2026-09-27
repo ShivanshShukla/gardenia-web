@@ -78,7 +78,7 @@
     "@vitest/coverage-v8": "4.1.11",
     "chromatic": "18.0.1",
     "eslint": "9.39.5",
-    "eslint-config-next": "16.3.5",
+    "eslint-config-next": "16.3.6",
     "husky": "9.1.7",
     "jsdom": "29.1.1",
     "lint-staged": "17.0.8",
