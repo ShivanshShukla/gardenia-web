@@ -1,7 +1,6 @@
 "use client";
 
 import type { PlantingSpot } from "@/core/planting-spots/domain/interfaces/planting-spot.interface";
-import type { PlantingSpotType } from "@/core/planting-spots/domain/types/planting-spot-type.type";
 import { PlantingSpotTypeBadge } from "@/core/planting-spots/presentation/components/planting-spot-type-badge/planting-spot-type-badge";
 import { PlantingSpotStatusBadge } from "@/core/planting-spots/presentation/components/planting-spot-status-badge/planting-spot-status-badge";
 import { CapacityBar } from "@/core/planting-spots/presentation/components/capacity-bar/capacity-bar";
