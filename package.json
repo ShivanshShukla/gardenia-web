@@ -74,7 +74,7 @@
     "@types/node": "26.6.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "6.0.3",
+    "@vitejs/plugin-react": "6.1.1",
     "@vitest/coverage-v8": "4.1.11",
     "chromatic": "18.0.1",
     "eslint": "9.39.5",
