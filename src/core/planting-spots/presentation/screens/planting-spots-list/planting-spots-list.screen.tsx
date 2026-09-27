@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { List, LayoutGrid } from 'lucide-react';
 import { ScreenHeader } from '@/shared/presentation/components/screen-header/screen-header';
 import { PlantingSpotCard } from '@/core/planting-spots/presentation/components/planting-spot-card/planting-spot-card';
 import { usePlantingSpots } from '@/core/planting-spots/presentation/hooks/use-planting-spots/use-planting-spots.hook';
@@ -26,9 +28,28 @@ export function PlantingSpotsListScreen({ dict, lang }: Props) {
       <ScreenHeader
         title={dict.list.title}
         actions={
-          <Button size="sm" onClick={() => setIsCreateOpen(true)}>
-            {dict.list.new}
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center rounded-lg border border-[var(--rule)] bg-[var(--paper)] p-0.5">
+              <div
+                className="flex items-center gap-1.5 rounded-md bg-[var(--forest-bg)] text-[var(--forest)] px-2.5 py-1 text-xs font-semibold"
+                aria-current="page"
+              >
+                <List className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{dict.list.viewList}</span>
+              </div>
+              <Link
+                href={`/${lang}/planting-spots/layout`}
+                className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-[var(--ink)]"
+                aria-label={dict.list.viewGrid}
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{dict.list.viewGrid}</span>
+              </Link>
+            </div>
+            <Button size="sm" onClick={() => setIsCreateOpen(true)}>
+              {dict.list.new}
+            </Button>
+          </div>
         }
       />
 

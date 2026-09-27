@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { PlantingSpot } from '@/core/planting-spots/domain/interfaces/planting-spot.interface';
+import dictEn from '@/core/planting-spots/presentation/i18n/en';
 
 vi.mock('@/core/planting-spots/presentation/hooks/use-planting-spots/use-planting-spots.hook', () => ({
   usePlantingSpots: vi.fn(),
@@ -67,6 +68,8 @@ const dict = {
     overCapacity: 'Over capacity',
     plants: 'plants',
     noCapacity: 'No limit',
+    viewGrid: 'Grid layout',
+    viewList: 'List view',
   },
   form: {
     titleCreate: 'New planting spot',
@@ -152,6 +155,7 @@ const dict = {
     cancel: 'Cancel',
     error: 'Could not add the plant. Try again.',
   },
+  layout: dictEn.layout,
 };
 
 describe('PlantingSpotsListScreen', () => {
@@ -218,5 +222,14 @@ describe('PlantingSpotsListScreen', () => {
     fireEvent.click(screen.getByText('Close modal'));
 
     expect(screen.queryByTestId('create-planting-spot-modal')).not.toBeInTheDocument();
+  });
+
+  it('renders link to layout view', () => {
+    vi.mocked(usePlantingSpots).mockReturnValue({ spots: [], total: 0, totalPages: 1, currentPage: 1, isLoading: false, error: null });
+
+    render(<PlantingSpotsListScreen dict={dict} lang="en" />);
+
+    const layoutLink = screen.getByRole('link', { name: 'Grid layout' });
+    expect(layoutLink).toHaveAttribute('href', '/en/planting-spots/layout');
   });
 });
