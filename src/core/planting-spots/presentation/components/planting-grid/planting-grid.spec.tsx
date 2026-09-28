@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import type { PlantingSpot } from '@/core/planting-spots/domain/interfaces/planting-spot.interface';
 import dictEn from '@/core/planting-spots/presentation/i18n/en';
+import dictEs from '@/core/planting-spots/presentation/i18n/es';
 import { PlantingGrid } from './planting-grid';
 
 describe('PlantingGrid', () => {
@@ -42,5 +43,21 @@ describe('PlantingGrid', () => {
     expect(screen.getByText('Col 1')).toBeInTheDocument();
     expect(screen.getByText('Col 2')).toBeInTheDocument();
     expect(screen.getByText('Row 1')).toBeInTheDocument();
+  });
+
+  it('renders localized row and column headers in Spanish', () => {
+    const matrix = [[null]];
+    render(
+      <PlantingGrid
+        matrix={matrix}
+        rows={1}
+        columns={1}
+        dict={dictEs}
+        lang="es"
+      />,
+    );
+
+    expect(screen.getByText('Col. 1')).toBeInTheDocument();
+    expect(screen.getByText('Fila 1')).toBeInTheDocument();
   });
 });

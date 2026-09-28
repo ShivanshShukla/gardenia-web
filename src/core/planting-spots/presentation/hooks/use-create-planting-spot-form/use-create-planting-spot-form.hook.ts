@@ -3,7 +3,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { plantingSpotSchema, type PlantingSpotFormValues } from '@/core/planting-spots/presentation/schemas/planting-spot.schema';
 import { useCreatePlantingSpot } from '@/core/planting-spots/presentation/hooks/use-create-planting-spot/use-create-planting-spot.hook';
 
-export function useCreatePlantingSpotForm(onClose: () => void) {
+export function useCreatePlantingSpotForm(
+  onClose: () => void,
+  initialValues?: Partial<PlantingSpotFormValues>,
+) {
   const { mutate: createPlantingSpot, isPending, error } = useCreatePlantingSpot();
 
   const form = useForm<PlantingSpotFormValues>({
@@ -19,6 +22,7 @@ export function useCreatePlantingSpotForm(onClose: () => void) {
       dimensionsHeight: null,
       dimensionsLength: null,
       soilType: '',
+      ...initialValues,
     },
   });
 

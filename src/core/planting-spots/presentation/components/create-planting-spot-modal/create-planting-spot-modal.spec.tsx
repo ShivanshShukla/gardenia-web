@@ -124,4 +124,10 @@ describe('CreatePlantingSpotModal', () => {
     render(<CreatePlantingSpotModal dict={dict} onClose={vi.fn()} />);
     expect(screen.getByText('Could not save the planting spot. Try again.')).toBeInTheDocument();
   });
+
+  it('forwards initialValues to useCreatePlantingSpotForm', () => {
+    const initialValues = { row: 2, column: 5 };
+    render(<CreatePlantingSpotModal dict={dict} onClose={vi.fn()} initialValues={initialValues} />);
+    expect(mockUseCreatePlantingSpotForm).toHaveBeenCalledWith(expect.any(Function), initialValues);
+  });
 });

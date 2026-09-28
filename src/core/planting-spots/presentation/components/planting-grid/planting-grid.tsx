@@ -53,7 +53,7 @@ export function PlantingGrid({
               key={`header-col-${col}`}
               className="flex h-7 items-center justify-center rounded-md bg-muted/40 text-[11px] font-semibold text-muted-foreground"
             >
-              Col {col}
+              {dict.layout.colHeader.replace('{col}', String(col))}
             </div>
           ))}
 
@@ -62,7 +62,7 @@ export function PlantingGrid({
             <div key={`row-group-${row}`} className="contents">
               {/* Row header */}
               <div className="flex w-12 items-center justify-center rounded-md bg-muted/40 text-[11px] font-semibold text-muted-foreground">
-                Row {row}
+                {dict.layout.rowHeader.replace('{row}', String(row))}
               </div>
 
               {/* Grid cells in row */}

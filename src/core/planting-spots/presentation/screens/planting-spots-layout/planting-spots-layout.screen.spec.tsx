@@ -9,12 +9,16 @@ vi.mock('@/core/planting-spots/presentation/hooks/use-planting-grid/use-planting
   usePlantingGrid: vi.fn(),
 }));
 
+const mockCreateModal = vi.fn();
 vi.mock('@/core/planting-spots/presentation/components/create-planting-spot-modal/create-planting-spot-modal', () => ({
-  CreatePlantingSpotModal: ({ onClose }: { onClose: () => void }) => (
-    <div data-testid="create-spot-modal">
-      <button onClick={onClose}>Close modal</button>
-    </div>
-  ),
+  CreatePlantingSpotModal: (props: { onClose: () => void; initialValues?: { row?: number | null; column?: number | null } }) => {
+    mockCreateModal(props);
+    return (
+      <div data-testid="create-spot-modal">
+        <button onClick={props.onClose}>Close modal</button>
+      </div>
+    );
+  },
 }));
 
 const mockSpots: PlantingSpot[] = [
@@ -34,6 +38,7 @@ const mockSpots: PlantingSpot[] = [
 ];
 
 describe('PlantingSpotsLayoutScreen', () => {
+  const setActiveDragSpotMock = vi.fn();
   const mockGridReturn = {
     matrix: [[mockSpots[0], null]],
     unassignedSpots: [],
@@ -44,7 +49,7 @@ describe('PlantingSpotsLayoutScreen', () => {
     isLoading: false,
     error: null,
     activeDragSpot: null,
-    setActiveDragSpot: vi.fn(),
+    setActiveDragSpot: setActiveDragSpotMock,
     setDimensions: vi.fn(),
     assignSpotPosition: vi.fn(),
     unassignSpot: vi.fn(),
@@ -97,5 +102,36 @@ describe('PlantingSpotsLayoutScreen', () => {
     fireEvent.click(zoomInBtn);
 
     expect(screen.getByText('110%')).toBeInTheDocument();
+  });
+
+  it('opens create modal with prefilled row and column when clicking create new spot in assign modal', () => {
+    render(<PlantingSpotsLayoutScreen dict={dictEn} lang="en" />);
+
+    const assignBtn = screen.getByRole('button', { name: /Click to assign a planting spot/i });
+    fireEvent.click(assignBtn);
+
+    const createHereBtn = screen.getByRole('button', { name: /Create new spot here/i });
+    fireEvent.click(createHereBtn);
+
+    expect(screen.getByTestId('create-spot-modal')).toBeInTheDocument();
+    expect(mockCreateModal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        initialValues: { row: 1, column: 2 },
+      }),
+    );
+  });
+
+  it('opens create modal without initial coordinates when clicking header new button', () => {
+    render(<PlantingSpotsLayoutScreen dict={dictEn} lang="en" />);
+
+    const newBtn = screen.getByRole('button', { name: /New/i });
+    fireEvent.click(newBtn);
+
+    expect(screen.getByTestId('create-spot-modal')).toBeInTheDocument();
+    expect(mockCreateModal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        initialValues: undefined,
+      }),
+    );
   });
 });

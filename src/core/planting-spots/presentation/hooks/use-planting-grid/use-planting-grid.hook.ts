@@ -8,20 +8,31 @@ import { usePlantingSpots } from '@/core/planting-spots/presentation/hooks/use-p
 import { useUpdatePlantingSpot } from '@/core/planting-spots/presentation/hooks/use-update-planting-spot/use-update-planting-spot.hook';
 import { useSpacesStore } from '@/core/spaces/infrastructure/store/spaces.store';
 import {
+  usePlantingGridStore,
+  DEFAULT_GRID_DIMENSIONS,
+} from '@/core/planting-spots/infrastructure/store/planting-grid.store';
+import {
   buildGridMatrix,
   getUnassignedSpots,
   calculateMinimumDimensions,
 } from '@/core/planting-spots/presentation/utils/planting-grid/planting-grid.util';
 import type { AppDict } from '@/shared/presentation/i18n/get-dictionary';
 
-const DEFAULT_DIMENSIONS = { rows: 5, columns: 5 };
-
-const getStorageKey = (spaceId: string | null) =>
-  `gardenia:grid-dimensions:${spaceId ?? 'default'}`;
+// Standard ceiling page size for loading all planting spots in the layout view.
+// Matches the pattern used in summary views and selectors across the application.
+export const LAYOUT_PAGE_SIZE = 100;
 
 export function usePlantingGrid(dict: AppDict['plantingSpots']) {
-  const currentSpaceId = useSpacesStore.getState().currentSpaceId;
-  const { spots: serverSpots, isLoading, error } = usePlantingSpots(1, 100);
+  const currentSpaceId = useSpacesStore((state) => state.currentSpaceId);
+  const storedDimensions = usePlantingGridStore(
+    (state) => state.dimensionsBySpace[currentSpaceId ?? 'default'],
+  );
+  const setStoreDimensions = usePlantingGridStore((state) => state.setDimensions);
+  const getStoreDimensions = usePlantingGridStore((state) => state.getDimensions);
+
+  const dimensions = storedDimensions ?? getStoreDimensions(currentSpaceId);
+
+  const { spots: serverSpots, isLoading, error } = usePlantingSpots(1, LAYOUT_PAGE_SIZE);
   const updateMutation = useUpdatePlantingSpot();
 
   const [optimisticMoves, setOptimisticMoves] = useState<
@@ -39,25 +50,9 @@ export function usePlantingGrid(dict: AppDict['plantingSpots']) {
     });
   }, [serverSpots, optimisticMoves]);
 
-  // Dimensions state (initialized from localStorage or calculated)
-  const [dimensions, setDimensionsState] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem(getStorageKey(currentSpaceId));
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (parsed.rows && parsed.columns) return parsed;
-        }
-      } catch {
-        // Fallback
-      }
-    }
-    return DEFAULT_DIMENSIONS;
-  });
-
   // Calculate minimum dimensions needed to hold existing placed spots
   const minDimensions = useMemo(
-    () => calculateMinimumDimensions(localSpots, DEFAULT_DIMENSIONS.rows, DEFAULT_DIMENSIONS.columns),
+    () => calculateMinimumDimensions(localSpots, DEFAULT_GRID_DIMENSIONS.rows, DEFAULT_GRID_DIMENSIONS.columns),
     [localSpots],
   );
 
@@ -69,17 +64,9 @@ export function usePlantingGrid(dict: AppDict['plantingSpots']) {
     (newRows: number, newCols: number) => {
       const clampedRows = Math.max(newRows, minDimensions.rows);
       const clampedCols = Math.max(newCols, minDimensions.columns);
-      const nextDims = { rows: clampedRows, columns: clampedCols };
-      setDimensionsState(nextDims);
-      if (typeof window !== 'undefined') {
-        try {
-          localStorage.setItem(getStorageKey(currentSpaceId), JSON.stringify(nextDims));
-        } catch {
-          // Ignore write error
-        }
-      }
+      setStoreDimensions(currentSpaceId, { rows: clampedRows, columns: clampedCols });
     },
-    [currentSpaceId, minDimensions],
+    [currentSpaceId, minDimensions, setStoreDimensions],
   );
 
   // 2D Matrix of spots
@@ -108,6 +95,11 @@ export function usePlantingGrid(dict: AppDict['plantingSpots']) {
           row: targetRow,
           column: targetCol,
         });
+        setOptimisticMoves((prev) => {
+          const next = { ...prev };
+          delete next[spot.id];
+          return next;
+        });
         toast.success(dict.layout.updateSuccess);
       } catch {
         setOptimisticMoves((prev) => {
@@ -135,6 +127,11 @@ export function usePlantingGrid(dict: AppDict['plantingSpots']) {
           row: null,
           column: null,
         });
+        setOptimisticMoves((prev) => {
+          const next = { ...prev };
+          delete next[spot.id];
+          return next;
+        });
         toast.success(dict.layout.updateSuccess);
       } catch {
         setOptimisticMoves((prev) => {
@@ -148,13 +145,18 @@ export function usePlantingGrid(dict: AppDict['plantingSpots']) {
     [updateMutation, dict],
   );
 
-  // Swap positions between two spots
+  // Swap positions between two spots with compensating rollback on failure
   const swapSpotPositions = useCallback(
     async (spotA: PlantingSpot, spotB: PlantingSpot) => {
-      const targetRowA = spotB.row ?? null;
-      const targetColA = spotB.column ?? null;
-      const targetRowB = spotA.row ?? null;
-      const targetColB = spotA.column ?? null;
+      const origRowA = spotA.row ?? null;
+      const origColA = spotA.column ?? null;
+      const origRowB = spotB.row ?? null;
+      const origColB = spotB.column ?? null;
+
+      const targetRowA = origRowB;
+      const targetColA = origColB;
+      const targetRowB = origRowA;
+      const targetColB = origColA;
 
       setOptimisticMoves((prev) => ({
         ...prev,
@@ -163,11 +165,7 @@ export function usePlantingGrid(dict: AppDict['plantingSpots']) {
       }));
 
       try {
-        await Promise.all([
-          updateMutation.mutateAsync({ id: spotA.id, row: targetRowA, column: targetColA }),
-          updateMutation.mutateAsync({ id: spotB.id, row: targetRowB, column: targetColB }),
-        ]);
-        toast.success(dict.layout.updateSuccess);
+        await updateMutation.mutateAsync({ id: spotA.id, row: targetRowA, column: targetColA });
       } catch {
         setOptimisticMoves((prev) => {
           const next = { ...prev };
@@ -176,7 +174,36 @@ export function usePlantingGrid(dict: AppDict['plantingSpots']) {
           return next;
         });
         toast.error(dict.layout.updateError);
+        return;
       }
+
+      try {
+        await updateMutation.mutateAsync({ id: spotB.id, row: targetRowB, column: targetColB });
+      } catch {
+        // Compensating rollback: revert spotA back on server
+        try {
+          await updateMutation.mutateAsync({ id: spotA.id, row: origRowA, column: origColA });
+        } catch {
+          // Query invalidation will sync cache eventually
+        }
+        setOptimisticMoves((prev) => {
+          const next = { ...prev };
+          delete next[spotA.id];
+          delete next[spotB.id];
+          return next;
+        });
+        toast.error(dict.layout.updateError);
+        return;
+      }
+
+      // Both updates succeeded consistently
+      setOptimisticMoves((prev) => {
+        const next = { ...prev };
+        delete next[spotA.id];
+        delete next[spotB.id];
+        return next;
+      });
+      toast.success(dict.layout.updateSuccess);
     },
     [updateMutation, dict],
   );

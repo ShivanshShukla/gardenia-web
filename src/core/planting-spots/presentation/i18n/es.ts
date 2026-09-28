@@ -125,6 +125,9 @@ const dict = {
     dragHelp: 'Arrastra las zonas para reorganizarlas o colocarlas en celdas vacías',
     updateSuccess: 'Posición actualizada',
     updateError: 'No se ha podido actualizar la posición. Inténtalo de nuevo.',
+    colHeader: 'Col. {col}',
+    rowHeader: 'Fila {row}',
+    dragSpot: 'Arrastrar zona',
     cellCoordinate: 'F{row} · C{column}',
   },
 } as const satisfies PlantingSpotsDictTranslated;

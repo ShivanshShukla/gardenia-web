@@ -120,6 +120,9 @@ const dict = {
     dragHelp: 'Drag spots to rearrange or drop into empty cells',
     updateSuccess: 'Position updated',
     updateError: 'Could not update position. Try again.',
+    colHeader: 'Col {col}',
+    rowHeader: 'Row {row}',
+    dragSpot: 'Drag spot',
     cellCoordinate: 'R{row} · C{column}',
   },
 } as const;

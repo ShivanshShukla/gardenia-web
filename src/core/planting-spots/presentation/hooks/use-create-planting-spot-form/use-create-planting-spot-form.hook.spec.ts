@@ -141,4 +141,18 @@ describe('useCreatePlantingSpotForm', () => {
     const { result } = renderHook(() => useCreatePlantingSpotForm(vi.fn()));
     expect(result.current.error).toBe(err);
   });
+
+  it('passes initialValues into useForm defaultValues', () => {
+    const initialValues = { row: 3, column: 4 };
+    renderHook(() => useCreatePlantingSpotForm(vi.fn(), initialValues));
+
+    expect(useForm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        defaultValues: expect.objectContaining({
+          row: 3,
+          column: 4,
+        }),
+      }),
+    );
+  });
 });

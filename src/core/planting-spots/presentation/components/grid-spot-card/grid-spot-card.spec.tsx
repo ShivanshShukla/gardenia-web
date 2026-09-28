@@ -54,4 +54,10 @@ describe('GridSpotCard', () => {
 
     expect(handleUnassign).toHaveBeenCalledWith(mockSpot);
   });
+
+  it('renders drag handle with localized aria-label', () => {
+    render(<GridSpotCard spot={mockSpot} dict={dictEn} lang="en" />);
+
+    expect(screen.getByRole('button', { name: dictEn.layout.dragSpot })).toBeInTheDocument();
+  });
 });

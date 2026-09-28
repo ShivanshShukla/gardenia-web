@@ -52,7 +52,7 @@ export function GridSpotCard({
           <button
             type="button"
             className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-[var(--ink)] touch-none p-0.5 rounded-sm"
-            aria-label="Drag spot"
+            aria-label={dict.layout.dragSpot}
             {...listeners}
             {...attributes}
           >

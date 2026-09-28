@@ -47,13 +47,15 @@ export function PlantingSpotsLayoutScreen({ dict, lang }: PlantingSpotsLayoutScr
     minRows,
     minCols,
     isLoading,
+    activeDragSpot,
+    setActiveDragSpot,
     setDimensions,
     assignSpotPosition,
     unassignSpot,
     handleDragEnd,
   } = usePlantingGrid(dict);
 
-  const [activeDragSpot, setActiveDragSpot] = useState<PlantingSpot | null>(null);
+  const [createCoords, setCreateCoords] = useState<{ row: number; column: number } | null>(null);
   const [zoom, setZoom] = useState(1);
   const [isDimensionsOpen, setIsDimensionsOpen] = useState(false);
   const [assigningCoords, setAssigningCoords] = useState<{ row: number; column: number } | null>(null);
@@ -176,7 +178,10 @@ export function PlantingSpotsLayoutScreen({ dict, lang }: PlantingSpotsLayoutScr
             <Button
               size="sm"
               className="gap-1.5"
-              onClick={() => setIsCreateOpen(true)}
+              onClick={() => {
+                setCreateCoords(null);
+                setIsCreateOpen(true);
+              }}
             >
               <Plus className="h-4 w-4" />
               {dict.list.new}
@@ -263,7 +268,8 @@ export function PlantingSpotsLayoutScreen({ dict, lang }: PlantingSpotsLayoutScr
             assignSpotPosition(spot, r, c);
             setAssigningCoords(null);
           }}
-          onCreateNew={() => {
+          onCreateNew={(row, column) => {
+            setCreateCoords({ row, column });
             setIsCreateOpen(true);
             setAssigningCoords(null);
           }}
@@ -275,7 +281,11 @@ export function PlantingSpotsLayoutScreen({ dict, lang }: PlantingSpotsLayoutScr
       {isCreateOpen && (
         <CreatePlantingSpotModal
           dict={dict}
-          onClose={() => setIsCreateOpen(false)}
+          initialValues={createCoords ? { row: createCoords.row, column: createCoords.column } : undefined}
+          onClose={() => {
+            setIsCreateOpen(false);
+            setCreateCoords(null);
+          }}
         />
       )}
     </div>
